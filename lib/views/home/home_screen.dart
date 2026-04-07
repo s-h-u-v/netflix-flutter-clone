@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../controllers/auth_provider.dart';
+import '../../controllers/movie_provider.dart';
+import '../../utils/constants.dart';
+import '../search/search_screen.dart';
+import '../profile/profile_screen.dart';
+import '../profile/watchlist_screen.dart';
+import 'widgets/movie_carousel.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _screens = [
+    const HomeBody(), // We'll extract the current body into HomeBody below
+    const SearchScreen(),
+    const WatchlistScreen(),
+    const ProfileScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    // If it's not the Home tab, don't show the transparent Netflix AppBar to avoid overlapping.
+    return Scaffold(
+      extendBodyBehindAppBar: _currentIndex == 0,
+      appBar: _currentIndex == 0 ? AppBar(
+        title: const Text(
+          'NETFLIX',
+          style: TextStyle(
+            color: Constants.primaryColor,
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.cast, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
+      ) : null,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Watchlist'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeBody extends StatelessWidget {
+  const HomeBody({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MovieProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(child: CircularProgressIndicator(color: Constants.primaryColor));
+        }
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Placeholder for Hero Banner
+              Container(
+                height: 500,
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/hero_banner.png'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.black, Colors.transparent],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.center,
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 20),
+              MovieCarousel(title: 'Trending Now', movies: provider.trendingMovies),
+              MovieCarousel(title: 'Top Rated', movies: provider.topRatedMovies),
+              MovieCarousel(title: 'Popular', movies: provider.popularMovies),
+              MovieCarousel(title: 'My Watchlist', movies: provider.watchlist),
+              const SizedBox(height: 30),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+

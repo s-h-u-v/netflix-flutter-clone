@@ -1,0 +1,43 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'utils/theme.dart';
+import 'views/auth/login_screen.dart';
+import 'views/home/home_screen.dart';
+import 'controllers/auth_provider.dart';
+import 'controllers/movie_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => MovieProvider()),
+      ],
+      child: const MovieApp(),
+    ),
+  );
+}
+
+class MovieApp extends StatelessWidget {
+  const MovieApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Netflix Clone',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.darkTheme,
+      home: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          if (auth.isInitLoading) {
+            return const Scaffold(backgroundColor: Colors.black, body: Center(child: CircularProgressIndicator(color: Colors.red)));
+          }
+          return auth.user != null ? const HomeScreen() : const LoginScreen();
+        },
+      ),
+    );
+  }
+}
