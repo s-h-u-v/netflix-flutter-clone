@@ -7,6 +7,7 @@ import 'controllers/auth_provider.dart';
 import 'controllers/movie_provider.dart';
 import 'services/settings_service.dart';
 import 'services/download_service.dart';
+import 'services/subscription_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => MovieProvider()),
         ChangeNotifierProvider(
           create: (_) => SettingsService()..load(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SubscriptionService()..load(),
         ),
         ChangeNotifierProxyProvider<SettingsService, DownloadService>(
           create: (context) => DownloadService(

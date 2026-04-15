@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../controllers/auth_provider.dart';
 import '../../services/settings_service.dart';
+import '../../services/subscription_service.dart';
 import '../../utils/constants.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
@@ -12,6 +13,7 @@ class AccountSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final settings = context.watch<SettingsService>();
+    final subscription = context.watch<SubscriptionService>();
 
     return Scaffold(
       appBar: AppBar(
@@ -28,7 +30,10 @@ class AccountSettingsScreen extends StatelessWidget {
               const SizedBox(height: 10),
               _InfoRow(label: 'Username', value: auth.user?.displayName ?? '—'),
               const SizedBox(height: 10),
-              const _InfoRow(label: 'Plan', value: 'Basic'),
+              _InfoRow(
+                label: 'Plan',
+                value: subscription.isPro ? 'Pro (₹100)' : 'Free',
+              ),
               const SizedBox(height: 14),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -41,6 +46,75 @@ class AccountSettingsScreen extends StatelessWidget {
                 ),
                 onPressed: () => _showChangePasswordDialog(context),
                 child: const Text('Change Password'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _SectionCard(
+            title: 'Subscription',
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                  subscription.isPro ? Icons.workspace_premium : Icons.lock_open,
+                  color: Colors.white70,
+                ),
+                title: Text(
+                  subscription.isPro ? 'You are on Pro' : 'You are on Free',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  subscription.isPro
+                      ? 'Access all videos'
+                      : 'Free plan allows only 2 videos',
+                  style: TextStyle(color: Colors.grey[400]),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (!subscription.isPro)
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Constants.primaryColor,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 46),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  ),
+                  onPressed: () async {
+                    final sub = context.read<SubscriptionService>();
+                    final ok = await _showDemoPaymentDialog(context);
+                    if (!ok) return;
+                    if (!context.mounted) return;
+                    await sub.setPlan(SubscriptionPlan.pro);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Pro activated (demo).')),
+                    );
+                  },
+                  child: const Text('Upgrade to Pro (Pay ₹100)'),
+                )
+              else
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[850],
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 46),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  ),
+                  onPressed: () async {
+                    if (!context.mounted) return;
+                    final sub = context.read<SubscriptionService>();
+                    await sub.setPlan(SubscriptionPlan.free);
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Downgraded to Free.')),
+                    );
+                  },
+                  child: const Text('Downgrade to Free'),
+                ),
+              const SizedBox(height: 6),
+              Text(
+                'This is a demo payment model. No real payment is processed.',
+                style: TextStyle(color: Colors.grey[500]),
               ),
             ],
           ),
@@ -173,6 +247,31 @@ class AccountSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<bool> _showDemoPaymentDialog(BuildContext context) async {
+    final res = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Demo payment', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Confirm demo payment of ₹100 to activate Pro.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Pay ₹100', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    return res ?? false;
   }
 }
 

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:provider/provider.dart';
 import '../../services/settings_service.dart';
+import '../../services/subscription_service.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String videoUrl;
@@ -24,6 +25,15 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  static const int _freeMaxVideos = 2;
+  static const List<String> _demoVideos = <String>[
+    'assets/videos/video_1.mp4',
+    'assets/videos/video_2.mp4',
+    'assets/videos/video_3.mp4',
+    'assets/videos/video_4.mp4',
+    'assets/videos/video_5.mp4',
+  ];
+
   late VideoPlayerController _controller;
   bool _isError = false;
   bool _showControls = true;
@@ -39,6 +49,48 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _index = widget.startIndex.clamp(0, widget.playlist.isEmpty ? 0 : widget.playlist.length - 1);
     _initializePlayer();
     _startHideTimer();
+  }
+
+  bool _isLockedIndex(int idx) {
+    if (widget.isLocalFile) return false; // don't gate local downloads
+    final isPro = context.read<SubscriptionService>().isPro;
+    return !isPro && idx >= _freeMaxVideos;
+  }
+
+  bool _isLockedCurrentUrl() {
+    if (widget.isLocalFile) return false;
+    final isPro = context.read<SubscriptionService>().isPro;
+    if (isPro) return false;
+
+    final url = _currentUrl();
+    final idx = _demoVideos.indexOf(url);
+    if (idx == -1) return false; // unknown url: don't gate
+    return idx >= _freeMaxVideos;
+  }
+
+  Future<bool> _showPaywallDialog() async {
+    final res = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: const Text('Pro required', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Free plan allows only 2 videos. Upgrade to Pro (demo) to watch all videos.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Not now', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Pay ₹100 (demo)', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    return res ?? false;
   }
 
   VideoPlayerController _buildController(String url) {
@@ -58,14 +110,31 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   Future<void> _initializePlayer() async {
     try {
+      if (_isLockedCurrentUrl()) {
+        final upgrade = await _showPaywallDialog();
+        if (!upgrade) {
+          if (!mounted) return;
+          Navigator.pop(context);
+          return;
+        }
+        if (!mounted) return;
+        await context.read<SubscriptionService>().setPlan(SubscriptionPlan.pro);
+        if (!mounted) return;
+      }
+
       _controller = _buildController(_currentUrl());
 
       // Update UI continuously for progress bar tracking
       _controller.addListener(() {
         final v = _controller.value;
-        if (v.isInitialized && !v.isPlaying && v.position >= v.duration && !_isCompleted) {
+        final isReallyFinished = v.isInitialized &&
+            v.duration != Duration.zero &&
+            !v.isPlaying &&
+            v.position >= v.duration - const Duration(milliseconds: 150);
+
+        if (isReallyFinished && !_isCompleted) {
           _isCompleted = true;
-          _handlePlaybackCompleted();
+          unawaited(_handlePlaybackCompleted());
         }
         setState(() {});
       });
@@ -82,6 +151,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   Future<void> _playAtIndex(int newIndex) async {
+    if (_isLockedIndex(newIndex)) {
+      final upgrade = await _showPaywallDialog();
+      if (!upgrade) return;
+      if (!mounted) return;
+      await context.read<SubscriptionService>().setPlan(SubscriptionPlan.pro);
+      if (!mounted) return;
+    }
+
     final url = widget.playlist[newIndex];
     setState(() {
       _isError = false;
@@ -95,7 +172,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       final v = _controller.value;
       if (v.isInitialized && !v.isPlaying && v.position >= v.duration && !_isCompleted) {
         _isCompleted = true;
-        _handlePlaybackCompleted();
+        unawaited(_handlePlaybackCompleted());
       }
       setState(() {});
     });
@@ -108,7 +185,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     await _controller.setLooping(false);
   }
 
-  void _handlePlaybackCompleted() {
+  Future<void> _handlePlaybackCompleted() async {
     if (!mounted) return;
     final autoplay = context.read<SettingsService>().autoplayNextEpisode;
     if (!autoplay) {
@@ -118,7 +195,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     if (widget.playlist.isEmpty) return;
     final nextIndex = _index + 1;
     if (nextIndex >= widget.playlist.length) return;
-    _playAtIndex(nextIndex);
+    if (_isLockedIndex(nextIndex)) {
+      final upgrade = await _showPaywallDialog();
+      if (!upgrade) return;
+      if (!mounted) return;
+      await context.read<SubscriptionService>().setPlan(SubscriptionPlan.pro);
+      if (!mounted) return;
+    }
+    await _playAtIndex(nextIndex);
   }
 
   void _startHideTimer() {

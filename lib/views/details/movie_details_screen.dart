@@ -5,6 +5,7 @@ import '../../../controllers/movie_provider.dart';
 import '../player/video_player_screen.dart';
 import '../../../services/settings_service.dart';
 import '../../../services/download_service.dart';
+import '../../../services/subscription_service.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
   final Movie movie;
@@ -89,20 +90,36 @@ class MovieDetailsScreen extends StatelessWidget {
                     icon: const Icon(Icons.play_arrow, size: 28),
                     label: const Text('Play', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     onPressed: () {
-                      final settings = context.read<SettingsService>();
-                      final playlist = <String>[
-                        settings.pickQualityUrl(movie.videoUrl),
-                        // Next episodes simulated as different video URLs.
+                      final subscription = context.read<SubscriptionService>();
+
+                      // Available demo videos in this app.
+                      final allVideos = <String>[
+                        'assets/videos/video_1.mp4',
+                        'assets/videos/video_2.mp4',
+                        'assets/videos/video_3.mp4',
                         'assets/videos/video_4.mp4',
                         'assets/videos/video_5.mp4',
                       ];
+
+                      // Every movie is mapped to one of the 5 demo videos.
+                      final mappedIndex = (movie.id % allVideos.length).clamp(0, allVideos.length - 1);
+
+                      // Free plan can only watch the first 2 demo videos.
+                      if (!subscription.isPro && mappedIndex >= 2) {
+                        _showProRequiredSnack(context);
+                        return;
+                      }
+
+                      final startIndex = mappedIndex;
+                      final startUrl = allVideos[mappedIndex];
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => VideoPlayerScreen(
-                            videoUrl: playlist.first,
-                            playlist: playlist,
-                            startIndex: 0,
+                            videoUrl: startUrl,
+                            playlist: allVideos,
+                            startIndex: startIndex,
                           ),
                         ),
                       );
@@ -313,6 +330,14 @@ class MovieDetailsScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
         ],
+      ),
+    );
+  }
+
+  void _showProRequiredSnack(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Pro required: Free plan allows only 2 videos.'),
       ),
     );
   }
