@@ -39,12 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
             letterSpacing: 2,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.cast, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ) : null,
       body: IndexedStack(
         index: _currentIndex,
