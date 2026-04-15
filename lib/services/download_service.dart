@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -102,6 +103,22 @@ class DownloadService extends ChangeNotifier {
     return replaced.isEmpty ? 'video' : replaced;
   }
 
+  Future<void> _saveToGallery(String filePath) async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+
+    final success = await GallerySaver.saveVideo(
+      filePath,
+      albumName: 'MovieFlix',
+    );
+
+    if (success != true) {
+      throw StateError(
+        'Downloaded in app, but failed to save to phone gallery. '
+        'Please allow media/photos permission and try again.',
+      );
+    }
+  }
+
   Future<void> downloadMovie(Movie movie) async {
     if (!canDownloadNow) {
       throw StateError('Wi-Fi required for download');
@@ -123,6 +140,7 @@ class DownloadService extends ChangeNotifier {
 
     final bytes = await rootBundle.load(assetPath);
     await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+    await _saveToGallery(filePath);
 
     final item = DownloadedVideo(
       movieId: movie.id,

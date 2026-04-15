@@ -303,11 +303,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                 onPressed: () => Navigator.pop(context),
                               ),
                               const Spacer(),
-                              const Icon(
-                                Icons.cast,
-                                color: Colors.white,
-                                size: 28,
-                              ),
                             ],
                           ),
                         ),

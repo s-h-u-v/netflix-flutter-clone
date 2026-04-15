@@ -152,6 +152,24 @@ class MovieDetailsScreen extends StatelessWidget {
 
                       return AppSecondaryButton(
                         onPressed: () async {
+                          final subscription = context.read<SubscriptionService>();
+
+                          // Keep download access aligned with playback access:
+                          // free plan gets only the first 2 mapped demo videos.
+                          final allVideos = <String>[
+                            'assets/videos/video_1.mp4',
+                            'assets/videos/video_2.mp4',
+                            'assets/videos/video_3.mp4',
+                            'assets/videos/video_4.mp4',
+                            'assets/videos/video_5.mp4',
+                          ];
+                          final mappedIndex =
+                              (movie.id % allVideos.length).clamp(0, allVideos.length - 1);
+                          if (!subscription.isPro && mappedIndex >= 2) {
+                            _showProRequiredSnack(context);
+                            return;
+                          }
+
                           if (isDownloaded) {
                             await context.read<DownloadService>().removeDownload(movie.id);
                             if (!context.mounted) return;
@@ -175,7 +193,7 @@ class MovieDetailsScreen extends StatelessWidget {
                             await context.read<DownloadService>().downloadMovie(movie);
                             if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Downloaded')),
+                              const SnackBar(content: Text('Downloaded and saved to gallery')),
                             );
                           } catch (e) {
                             if (!context.mounted) return;
