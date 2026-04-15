@@ -1,6 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../services/auth_db_service.dart';
 
 class AuthUser {
   final String uid;
@@ -10,50 +9,45 @@ class AuthUser {
 }
 
 class AuthProvider extends ChangeNotifier {
+  final AuthDbService _authDbService;
   AuthUser? _user;
   bool _isLoading = false;
   bool _isInitLoading = true;
   String _errorMessage = '';
-
-  Map<String, String> _registeredUsers = {};
-  Map<String, String> _userProfiles = {};
+  String _lastSuccessMessage = '';
 
   AuthUser? get user => _user;
   bool get isLoading => _isLoading;
   bool get isInitLoading => _isInitLoading;
   String get errorMessage => _errorMessage;
+  String get lastSuccessMessage => _lastSuccessMessage;
 
-  AuthProvider() {
-    _initPersistentState();
+  AuthProvider({AuthDbService? authDbService})
+    : _authDbService = authDbService ?? AuthDbService() {
+    _initializeAuth();
   }
 
-  Future<void> _initPersistentState() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    final usersJson = prefs.getString('registered_users');
-    final profilesJson = prefs.getString('user_profiles');
-    
-    if (usersJson != null) {
-      _registeredUsers = Map<String, String>.from(jsonDecode(usersJson));
+  Future<void> _initializeAuth() async {
+    try {
+      final localUser = await _authDbService.getSignedInUser();
+      _user = _mapLocalUser(localUser);
+    } catch (_) {
+      _errorMessage = 'Could not initialize local authentication.';
+      _user = null;
+    } finally {
+      _isInitLoading = false;
+      notifyListeners();
     }
-    if (profilesJson != null) {
-      _userProfiles = Map<String, String>.from(jsonDecode(profilesJson));
-    }
-
-    final currentEmail = prefs.getString('current_user_email');
-    if (currentEmail != null && _registeredUsers.containsKey(currentEmail)) {
-      final displayName = _userProfiles[currentEmail] ?? 'Mock User';
-      _user = AuthUser(uid: 'mock_uid_${currentEmail.hashCode}', email: currentEmail, displayName: displayName);
-    }
-    
-    _isInitLoading = false;
-    notifyListeners();
   }
 
-  Future<void> _savePersistentState() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('registered_users', jsonEncode(_registeredUsers));
-    await prefs.setString('user_profiles', jsonEncode(_userProfiles));
+  AuthUser? _mapLocalUser(LocalAuthUser? localUser) {
+    if (localUser == null) return null;
+
+    return AuthUser(
+      uid: localUser.id.toString(),
+      email: localUser.email,
+      displayName: localUser.displayName,
+    );
   }
 
   void _setLoading(bool val) {
@@ -62,55 +56,113 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> signIn(String email, String password) async {
-    _setLoading(true);
-    _errorMessage = '';
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (!_registeredUsers.containsKey(email) || _registeredUsers[email] != password) {
-      _errorMessage = 'invalid login credentials';
-      _setLoading(false);
+    if (email.trim().isEmpty || password.trim().isEmpty) {
+      _errorMessage = 'Email and password are required.';
+      notifyListeners();
       return false;
     }
 
-    final displayName = _userProfiles[email] ?? 'Mock User';
-    _user = AuthUser(uid: 'mock_uid_${email.hashCode}', email: email, displayName: displayName);
-    
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('current_user_email', email);
+    _setLoading(true);
+    _errorMessage = '';
 
-    _setLoading(false);
-    return true;
+    try {
+      final result = await _authDbService.signIn(
+        email: email,
+        password: password,
+      );
+
+      if (!result.isSuccess) {
+        _errorMessage = result.error ?? 'Invalid email or password.';
+        return false;
+      }
+
+      _user = _mapLocalUser(result.user);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _errorMessage = 'Something went wrong while signing in.';
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<bool> signUp(String email, String password, String name) async {
-    _setLoading(true);
-    _errorMessage = '';
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (_registeredUsers.containsKey(email)) {
-      _errorMessage = 'email already exists, try some other mail';
-      _setLoading(false);
+    if (email.trim().isEmpty || password.trim().isEmpty) {
+      _errorMessage = 'Email and password are required.';
+      notifyListeners();
       return false;
     }
 
-    _registeredUsers[email] = password;
-    _userProfiles[email] = name;
-    
-    await _savePersistentState();
-    
-    _user = AuthUser(uid: 'mock_uid_${email.hashCode}', email: email, displayName: name);
-    
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('current_user_email', email);
+    if (password.trim().length < 6) {
+      _errorMessage = 'Password is too weak. Use at least 6 characters.';
+      notifyListeners();
+      return false;
+    }
 
-    _setLoading(false);
-    return true;
+    _setLoading(true);
+    _errorMessage = '';
+
+    try {
+      final result = await _authDbService.signUp(
+        email: email,
+        password: password,
+        displayName: name,
+      );
+
+      if (!result.isSuccess) {
+        _errorMessage = result.error ?? 'Could not create account.';
+        return false;
+      }
+
+      _user = _mapLocalUser(result.user);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _errorMessage = 'Something went wrong while signing up.';
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 
   Future<void> signOut() async {
+    await _authDbService.signOut();
     _user = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('current_user_email');
     notifyListeners();
+  }
+
+  Future<bool> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    if (_user == null) return false;
+    if (newPassword.trim().length < 6) {
+      _errorMessage = 'Password is too weak. Use at least 6 characters.';
+      notifyListeners();
+      return false;
+    }
+
+    _setLoading(true);
+    _errorMessage = '';
+    _lastSuccessMessage = '';
+    try {
+      final ok = await _authDbService.changePasswordForActiveUser(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+      if (!ok) {
+        _errorMessage = 'Current password is incorrect.';
+        return false;
+      }
+      _lastSuccessMessage = 'Password updated.';
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _errorMessage = 'Could not update password.';
+      return false;
+    } finally {
+      _setLoading(false);
+    }
   }
 }

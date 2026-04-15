@@ -8,9 +8,9 @@ class MovieProvider extends ChangeNotifier {
   List<Movie> _trendingMovies = [];
   List<Movie> _topRatedMovies = [];
   List<Movie> _popularMovies = [];
-  List<Movie> _watchlist = [];
-  List<Movie> _downloads = []; // New downloads tracker
-  
+  final List<Movie> _watchlist = [];
+  final List<Movie> _downloads = []; // New downloads tracker
+
   bool _isLoading = true;
 
   List<Movie> get trendingMovies => _trendingMovies;
@@ -70,4 +70,3 @@ class MovieProvider extends ChangeNotifier {
     return _downloads.any((m) => m.id == movieId);
   }
 }
-

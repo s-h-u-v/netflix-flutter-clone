@@ -6,7 +6,7 @@ class MovieCarousel extends StatelessWidget {
   final String title;
   final List<Movie> movies;
 
-  const MovieCarousel({Key? key, required this.title, required this.movies}) : super(key: key);
+  const MovieCarousel({super.key, required this.title, required this.movies});
 
   @override
   Widget build(BuildContext context) {

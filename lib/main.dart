@@ -5,16 +5,29 @@ import 'views/auth/login_screen.dart';
 import 'views/home/home_screen.dart';
 import 'controllers/auth_provider.dart';
 import 'controllers/movie_provider.dart';
+import 'services/settings_service.dart';
+import 'services/download_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => MovieProvider()),
+        ChangeNotifierProvider(
+          create: (_) => SettingsService()..load(),
+        ),
+        ChangeNotifierProxyProvider<SettingsService, DownloadService>(
+          create: (context) => DownloadService(
+            settings: context.read<SettingsService>(),
+          )..load(),
+          update: (context, settings, previous) {
+            // Keep existing instance; it reads settings dynamically.
+            return previous ?? DownloadService(settings: settings)..load();
+          },
+        ),
       ],
       child: const MovieApp(),
     ),
@@ -22,7 +35,7 @@ void main() async {
 }
 
 class MovieApp extends StatelessWidget {
-  const MovieApp({Key? key}) : super(key: key);
+  const MovieApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +46,10 @@ class MovieApp extends StatelessWidget {
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           if (auth.isInitLoading) {
-            return const Scaffold(backgroundColor: Colors.black, body: Center(child: CircularProgressIndicator(color: Colors.red)));
+            return const Scaffold(
+              backgroundColor: Colors.black,
+              body: Center(child: CircularProgressIndicator(color: Colors.red)),
+            );
           }
           return auth.user != null ? const HomeScreen() : const LoginScreen();
         },

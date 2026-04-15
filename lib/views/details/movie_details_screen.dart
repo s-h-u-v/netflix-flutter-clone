@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import '../../../models/movie.dart';
 import '../../../controllers/movie_provider.dart';
 import '../player/video_player_screen.dart';
+import '../../../services/settings_service.dart';
+import '../../../services/download_service.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
   final Movie movie;
 
-  const MovieDetailsScreen({Key? key, required this.movie}) : super(key: key);
+  const MovieDetailsScreen({super.key, required this.movie});
 
   @override
   Widget build(BuildContext context) {
@@ -87,20 +89,32 @@ class MovieDetailsScreen extends StatelessWidget {
                     icon: const Icon(Icons.play_arrow, size: 28),
                     label: const Text('Play', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     onPressed: () {
+                      final settings = context.read<SettingsService>();
+                      final playlist = <String>[
+                        settings.pickQualityUrl(movie.videoUrl),
+                        // Next episodes simulated as different video URLs.
+                        'assets/videos/video_4.mp4',
+                        'assets/videos/video_5.mp4',
+                      ];
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => VideoPlayerScreen(videoUrl: movie.videoUrl),
+                          builder: (_) => VideoPlayerScreen(
+                            videoUrl: playlist.first,
+                            playlist: playlist,
+                            startIndex: 0,
+                          ),
                         ),
                       );
                     },
                   ),
                   const SizedBox(height: 8),
                   
-                  // Download Button
-                  Consumer<MovieProvider>(
-                    builder: (context, provider, child) {
-                      final isDownloaded = provider.isDownloaded(movie.id);
+                  Consumer2<DownloadService, SettingsService>(
+                    builder: (context, downloads, settings, child) {
+                      final isDownloaded = downloads.isDownloaded(movie.id);
+                      final canDownload = downloads.canDownloadNow;
+
                       return ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey[800],
@@ -109,12 +123,42 @@ class MovieDetailsScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                         ),
                         icon: Icon(isDownloaded ? Icons.check_circle : Icons.file_download),
-                        label: Text(isDownloaded ? 'Downloaded' : 'Download', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        onPressed: () {
-                          provider.toggleDownload(movie);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(isDownloaded ? 'Removed from downloads' : 'Movie downloaded locally!')),
-                          );
+                        label: Text(
+                          isDownloaded ? 'Downloaded' : 'Download',
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () async {
+                          if (isDownloaded) {
+                            await context.read<DownloadService>().removeDownload(movie.id);
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Removed from downloads')),
+                            );
+                            return;
+                          }
+
+                          if (!canDownload && settings.wifiOnlyDownloads) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Wi‑Fi required for download')),
+                            );
+                            return;
+                          }
+
+                          try {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Downloading...')),
+                            );
+                            await context.read<DownloadService>().downloadMovie(movie);
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Downloaded')),
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
                         },
                       );
                     },

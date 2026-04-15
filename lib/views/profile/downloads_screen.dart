@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/movie_provider.dart';
 import '../../utils/constants.dart';
-import '../details/movie_details_screen.dart';
+import '../../services/download_service.dart';
+import '../../services/settings_service.dart';
+import '../player/video_player_screen.dart';
 
 class DownloadsScreen extends StatelessWidget {
-  const DownloadsScreen({Key? key}) : super(key: key);
+  const DownloadsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +15,31 @@ class DownloadsScreen extends StatelessWidget {
         title: const Text('My Downloads'),
         backgroundColor: Constants.backgroundColor,
       ),
-      body: Consumer<MovieProvider>(
-        builder: (context, provider, child) {
-          if (provider.downloads.isEmpty) {
+      body: Consumer2<DownloadService, SettingsService>(
+        builder: (context, downloads, settings, child) {
+          if (!downloads.isLoaded || !settings.isLoaded) {
+            return const Center(
+              child: CircularProgressIndicator(color: Constants.primaryColor),
+            );
+          }
+
+          if (settings.wifiOnlyDownloads && !downloads.isOnWifi) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Text(
+                  'Connect to Wi‑Fi to access downloads.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 18),
+                ),
+              ),
+            );
+          }
+
+          if (downloads.downloads.isEmpty) {
             return const Center(
               child: Text(
-                'You have no downloaded movies.',
+                'You have no downloaded videos.',
                 style: TextStyle(color: Colors.grey, fontSize: 18),
               ),
             );
@@ -33,28 +53,32 @@ class DownloadsScreen extends StatelessWidget {
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
             ),
-            itemCount: provider.downloads.length,
+            itemCount: downloads.downloads.length,
             itemBuilder: (context, index) {
-              final movie = provider.downloads[index];
+              final item = downloads.downloads[index];
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => MovieDetailsScreen(movie: movie)),
+                    MaterialPageRoute(
+                      builder: (_) => VideoPlayerScreen(
+                        videoUrl: item.localPath,
+                        playlist: const [],
+                        startIndex: 0,
+                        isLocalFile: true,
+                      ),
+                    ),
                   );
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: movie.posterPath.isNotEmpty
-                      ? Image.asset(
-                          movie.posterPath,
-                          fit: BoxFit.cover,
-                        )
+                  child: item.posterPath.isNotEmpty
+                      ? Image.asset(item.posterPath, fit: BoxFit.cover)
                       : Container(
                           color: Colors.grey[800],
                           child: Center(
                             child: Text(
-                              movie.title,
+                              item.title,
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 10),
                             ),

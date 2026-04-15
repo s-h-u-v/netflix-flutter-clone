@@ -5,7 +5,7 @@ import '../../utils/constants.dart';
 import '../details/movie_details_screen.dart';
 
 class WatchlistScreen extends StatelessWidget {
-  const WatchlistScreen({Key? key}) : super(key: key);
+  const WatchlistScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,16 +40,15 @@ class WatchlistScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => MovieDetailsScreen(movie: movie)),
+                    MaterialPageRoute(
+                      builder: (_) => MovieDetailsScreen(movie: movie),
+                    ),
                   );
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: movie.posterPath.isNotEmpty
-                      ? Image.asset(
-                          movie.posterPath,
-                          fit: BoxFit.cover,
-                        )
+                      ? Image.asset(movie.posterPath, fit: BoxFit.cover)
                       : Container(
                           color: Colors.grey[800],
                           child: Center(

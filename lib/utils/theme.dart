@@ -9,7 +9,6 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: Constants.primaryColor,
         surface: Constants.surfaceColor,
-        background: Constants.backgroundColor,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -23,7 +22,10 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
       ),
       textTheme: const TextTheme(
-        headlineLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        headlineLarge: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
         titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         bodyMedium: TextStyle(color: Colors.white70),
       ),

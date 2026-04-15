@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controllers/auth_provider.dart';
 import '../../controllers/movie_provider.dart';
 import '../../utils/constants.dart';
 import '../search/search_screen.dart';
@@ -9,7 +8,7 @@ import '../profile/watchlist_screen.dart';
 import 'widgets/movie_carousel.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -70,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class HomeBody extends StatelessWidget {
-  const HomeBody({Key? key}) : super(key: key);
+  const HomeBody({super.key});
 
   @override
   Widget build(BuildContext context) {

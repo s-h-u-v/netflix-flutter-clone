@@ -2,6 +2,30 @@
 
 A new Flutter project.
 
+## Authentication and Storage
+
+The app now uses local SQLite storage for account authentication.
+
+- Signup creates a local account on the device.
+- Login validates against the local SQLite database.
+- The active session is persisted locally, so users stay logged in until sign out.
+- Passwords are stored in plain text as currently requested.
+
+## Android Emulator Run Guide
+
+1. Open an Android emulator from Android Studio Device Manager.
+2. From project root run:
+
+   - `flutter clean`
+   - `flutter pub get`
+   - `flutter run`
+
+3. Validate the auth flow:
+
+   - Sign up with a new account.
+   - Close and reopen the app to confirm auto-login.
+   - Sign out and confirm login screen is shown again.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
