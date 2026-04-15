@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
 import '../../services/download_service.dart';
 import '../../services/settings_service.dart';
 import '../player/video_player_screen.dart';
@@ -13,13 +13,12 @@ class DownloadsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Downloads'),
-        backgroundColor: Constants.backgroundColor,
       ),
       body: Consumer2<DownloadService, SettingsService>(
         builder: (context, downloads, settings, child) {
           if (!downloads.isLoaded || !settings.isLoaded) {
             return const Center(
-              child: CircularProgressIndicator(color: Constants.primaryColor),
+              child: CircularProgressIndicator(color: AppColors.purpleLight),
             );
           }
 

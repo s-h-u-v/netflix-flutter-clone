@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/auth_provider.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/widgets/app_buttons.dart';
 import '../home/home_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -43,8 +44,14 @@ class _SignupScreenState extends State<SignupScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('MOVIEFLIX', style: TextStyle(color: Constants.primaryColor, fontWeight: FontWeight.bold, fontSize: 30)),
-        backgroundColor: Colors.transparent,
+        title: const Text(
+          'MOVIEFLIX',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 30,
+          ),
+        ),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -63,8 +70,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: InputDecoration(
                   hintText: 'Full Name',
                   filled: true,
-                  fillColor: const Color(0xFF333333),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
+                  fillColor: AppColors.elevated,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -73,8 +83,11 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: InputDecoration(
                   hintText: 'Email or phone number',
                   filled: true,
-                  fillColor: const Color(0xFF333333),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
+                  fillColor: AppColors.elevated,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -84,32 +97,44 @@ class _SignupScreenState extends State<SignupScreen> {
                 decoration: InputDecoration(
                   hintText: 'Password',
                   filled: true,
-                  fillColor: const Color(0xFF333333),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
+                  fillColor: AppColors.elevated,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Constants.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                ),
+              AppPrimaryButton(
                 onPressed: authProvider.isLoading ? null : _signup,
-                child: authProvider.isLoading 
-                    ? const CircularProgressIndicator(color: Colors.white) 
-                    : const Text('Sign Up', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                child: authProvider.isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textPrimary,
+                        ),
+                      )
+                    : const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Already have an account? ', style: TextStyle(color: Colors.grey)),
+                  const Text('Already have an account? ', style: TextStyle(color: AppColors.textMuted)),
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
                     },
-                    child: const Text('Sign in now.', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: const Text('Sign in now.', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
                   )
                 ],
               )

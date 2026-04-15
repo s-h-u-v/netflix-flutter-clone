@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/movie_provider.dart';
 import '../../models/movie.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
 import '../details/movie_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -50,11 +50,10 @@ class _SearchScreenState extends State<SearchScreen> {
           decoration: const InputDecoration(
             hintText: 'Search for a show, movie, genre, etc.',
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: TextStyle(color: AppColors.textMuted),
           ),
-          style: const TextStyle(color: Colors.white, fontSize: 18),
+          style: const TextStyle(color: AppColors.textPrimary, fontSize: 18),
         ),
-        backgroundColor: Constants.backgroundColor,
       ),
       body: _searchResults.isEmpty ? _buildIdleState() : _buildSearchResults(),
     );
@@ -65,11 +64,11 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search, size: 80, color: Colors.grey),
+          Icon(Icons.search, size: 80, color: AppColors.textMuted),
           SizedBox(height: 16),
           Text(
             'Find your next watch',
-            style: TextStyle(color: Colors.grey, fontSize: 20),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 20),
           ),
         ],
       ),

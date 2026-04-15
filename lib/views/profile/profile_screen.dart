@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/auth_provider.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/app_gradients.dart';
 import 'downloads_screen.dart';
 import 'account_settings_screen.dart';
 import '../auth/login_screen.dart';
@@ -26,7 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profiles & More'),
-        backgroundColor: Constants.backgroundColor,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -40,13 +40,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.blueGrey,
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: AppGradients.primary,
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.purpleDark.withValues(alpha: 0.25),
+                          blurRadius: 18,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
                     child: const Icon(
                       Icons.person,
                       size: 60,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -91,7 +98,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Card(
-                color: Colors.grey[900],
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
@@ -136,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
               child: const Text(
                 'Sign Out',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+              style: TextStyle(color: AppColors.textMuted, fontSize: 16),
               ),
             ),
             const SizedBox(height: 10),
@@ -159,15 +167,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: Text(title, style: const TextStyle(color: Colors.white)),
-        content: Text(message, style: const TextStyle(color: Colors.white70)),
+        title: Text(title),
+        content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'OK',
-              style: TextStyle(color: Constants.primaryColor),
+              style: TextStyle(color: AppColors.purpleLight),
             ),
           ),
         ],
@@ -177,14 +184,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildListTile(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: Colors.grey),
+      leading: Icon(icon, color: AppColors.textMuted),
       title: Text(
         title,
-        style: const TextStyle(color: Colors.white70, fontSize: 18),
+        style: const TextStyle(color: AppColors.textSecondary, fontSize: 18),
       ),
       trailing: const Icon(
         Icons.arrow_forward_ios,
-        color: Colors.grey,
+        color: AppColors.textMuted,
         size: 16,
       ),
       onTap: onTap,
@@ -199,10 +206,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
           ),
-          Text(value, style: const TextStyle(color: Colors.white)),
+          Text(value, style: const TextStyle(color: AppColors.textPrimary)),
         ],
       ),
     );

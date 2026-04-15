@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/movie_provider.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
 import '../search/search_screen.dart';
 import '../profile/profile_screen.dart';
 import '../profile/watchlist_screen.dart';
@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text(
           'MOVIEFLIX',
           style: TextStyle(
-            color: Constants.primaryColor,
+            color: AppColors.textPrimary,
             fontSize: 28,
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -76,7 +76,9 @@ class HomeBody extends StatelessWidget {
     return Consumer<MovieProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
-          return const Center(child: CircularProgressIndicator(color: Constants.primaryColor));
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.purpleLight),
+          );
         }
 
         return SingleChildScrollView(

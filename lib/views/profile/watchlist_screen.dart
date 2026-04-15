@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/movie_provider.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
 import '../details/movie_details_screen.dart';
 
 class WatchlistScreen extends StatelessWidget {
@@ -12,7 +12,6 @@ class WatchlistScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Watchlist'),
-        backgroundColor: Constants.backgroundColor,
       ),
       body: Consumer<MovieProvider>(
         builder: (context, provider, child) {
@@ -20,7 +19,7 @@ class WatchlistScreen extends StatelessWidget {
             return const Center(
               child: Text(
                 'Your watchlist is empty.',
-                style: TextStyle(color: Colors.grey, fontSize: 18),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 18),
               ),
             );
           }
@@ -50,7 +49,7 @@ class WatchlistScreen extends StatelessWidget {
                   child: movie.posterPath.isNotEmpty
                       ? Image.asset(movie.posterPath, fit: BoxFit.cover)
                       : Container(
-                          color: Colors.grey[800],
+                          color: AppColors.elevated,
                           child: Center(
                             child: Text(
                               movie.title,

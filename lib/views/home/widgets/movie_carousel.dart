@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/movie.dart';
 import '../../details/movie_details_screen.dart';
+import '../../../theme/app_colors.dart';
 
 class MovieCarousel extends StatelessWidget {
   final String title;
@@ -22,7 +23,7 @@ class MovieCarousel extends StatelessWidget {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -47,30 +48,30 @@ class MovieCarousel extends StatelessWidget {
                   width: 145,
                   margin: const EdgeInsets.only(right: 16.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[900], // Refined background
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 5,
-                        offset: const Offset(0, 4),
+                        color: AppColors.background.withValues(alpha: 0.6),
+                        blurRadius: 14,
+                        offset: const Offset(0, 10),
                       )
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(16),
                     child: movie.posterPath.isNotEmpty
                         ? Image.asset(
                             movie.posterPath,
                             fit: BoxFit.cover,
                           )
                         : Container(
-                            color: Colors.grey[850],
+                            color: AppColors.elevated,
                             child: Center(
                               child: Text(
                                 movie.title,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 14),
+                                style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                               ),
                             ),
                           ),

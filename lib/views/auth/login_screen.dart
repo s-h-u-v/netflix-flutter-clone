@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controllers/auth_provider.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/widgets/app_buttons.dart';
 import '../home/home_screen.dart';
 import 'signup_screen.dart';
 
@@ -44,12 +45,11 @@ class _LoginScreenState extends State<LoginScreen> {
         title: const Text(
           'MOVIEFLIX',
           style: TextStyle(
-            color: Constants.primaryColor,
+            color: AppColors.textPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 30,
           ),
         ),
-        backgroundColor: Colors.transparent,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -68,9 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'Email or phone number',
                   filled: true,
-                  fillColor: const Color(0xFF333333),
+                  fillColor: AppColors.elevated,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -82,31 +82,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   hintText: 'Password',
                   filled: true,
-                  fillColor: const Color(0xFF333333),
+                  fillColor: AppColors.elevated,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
                 ),
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Constants.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
+              AppPrimaryButton(
                 onPressed: authProvider.isLoading ? null : _login,
                 child: authProvider.isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textPrimary,
+                        ),
+                      )
                     : const Text(
                         'Sign In',
                         style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
               ),
@@ -116,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Text(
                     'New to Movieflix? ',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: AppColors.textMuted),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text(
                       'Sign up now.',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../../controllers/auth_provider.dart';
 import '../../services/settings_service.dart';
 import '../../services/subscription_service.dart';
-import '../../utils/constants.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/widgets/app_buttons.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({super.key});
@@ -18,7 +19,6 @@ class AccountSettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Account Settings'),
-        backgroundColor: Constants.backgroundColor,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -37,11 +37,11 @@ class AccountSettingsScreen extends StatelessWidget {
               const SizedBox(height: 14),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[850],
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.elevated,
+                  foregroundColor: AppColors.textPrimary,
                   minimumSize: const Size(double.infinity, 46),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 onPressed: () => _showChangePasswordDialog(context),
@@ -72,13 +72,7 @@ class AccountSettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (!subscription.isPro)
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Constants.primaryColor,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 46),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  ),
+                AppPrimaryButton(
                   onPressed: () async {
                     final sub = context.read<SubscriptionService>();
                     final ok = await _showDemoPaymentDialog(context);
@@ -90,16 +84,16 @@ class AccountSettingsScreen extends StatelessWidget {
                       const SnackBar(content: Text('Pro activated (demo).')),
                     );
                   },
-                  child: const Text('Upgrade to Pro (Pay ₹100)'),
+                  child: const Text(
+                    'Upgrade to Pro (Pay ₹100)',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 )
               else
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[850],
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 46),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  ),
+                AppSecondaryButton(
                   onPressed: () async {
                     if (!context.mounted) return;
                     final sub = context.read<SubscriptionService>();
@@ -109,12 +103,18 @@ class AccountSettingsScreen extends StatelessWidget {
                       const SnackBar(content: Text('Downgraded to Free.')),
                     );
                   },
-                  child: const Text('Downgrade to Free'),
+                  child: const Text(
+                    'Downgrade to Free',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               const SizedBox(height: 6),
               Text(
                 'This is a demo payment model. No real payment is processed.',
-                style: TextStyle(color: Colors.grey[500]),
+                style: const TextStyle(color: AppColors.textMuted),
               ),
             ],
           ),
@@ -124,17 +124,17 @@ class AccountSettingsScreen extends StatelessWidget {
             children: [
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.play_circle_outline, color: Colors.white70),
+                secondary: const Icon(Icons.play_circle_outline, color: AppColors.textSecondary),
                 title: const Text(
                   'Autoplay Next Episode',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: AppColors.textPrimary),
                 ),
                 subtitle: Text(
                   settings.autoplayNextEpisode ? 'ON' : 'OFF',
-                  style: TextStyle(color: Colors.grey[400]),
+                  style: const TextStyle(color: AppColors.textSecondary),
                 ),
                 value: settings.autoplayNextEpisode,
-                activeThumbColor: Constants.primaryColor,
+                activeThumbColor: AppColors.purpleLight,
                 onChanged: (val) => context.read<SettingsService>().setAutoplayNextEpisode(val),
               ),
             ],
@@ -145,24 +145,24 @@ class AccountSettingsScreen extends StatelessWidget {
             children: [
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.wifi, color: Colors.white70),
+                secondary: const Icon(Icons.wifi, color: AppColors.textSecondary),
                 title: const Text(
                   'Wi‑Fi Only Downloads',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: AppColors.textPrimary),
                 ),
                 subtitle: Text(
                   settings.wifiOnlyDownloads ? 'ON' : 'OFF',
-                  style: TextStyle(color: Colors.grey[400]),
+                  style: const TextStyle(color: AppColors.textSecondary),
                 ),
                 value: settings.wifiOnlyDownloads,
-                activeThumbColor: Constants.primaryColor,
+                activeThumbColor: AppColors.purpleLight,
                 onChanged: (val) => context.read<SettingsService>().setWifiOnlyDownloads(val),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   'When enabled, downloads and downloads access require Wi‑Fi.',
-                  style: TextStyle(color: Colors.grey[500]),
+                  style: const TextStyle(color: AppColors.textMuted),
                 ),
               ),
             ],
@@ -180,8 +180,7 @@ class AccountSettingsScreen extends StatelessWidget {
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Change Password', style: TextStyle(color: Colors.white)),
+        title: const Text('Change Password'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -190,9 +189,9 @@ class AccountSettingsScreen extends StatelessWidget {
               obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Current password',
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: AppColors.textSecondary),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textPrimary),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -200,9 +199,9 @@ class AccountSettingsScreen extends StatelessWidget {
               obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'New password (min 6 chars)',
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: AppColors.textSecondary),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textPrimary),
             ),
             const SizedBox(height: 10),
             TextField(
@@ -210,16 +209,16 @@ class AccountSettingsScreen extends StatelessWidget {
               obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Confirm new password',
-                labelStyle: TextStyle(color: Colors.white70),
+                labelStyle: TextStyle(color: AppColors.textSecondary),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textPrimary),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
           ),
           TextButton(
             onPressed: () async {
@@ -242,7 +241,7 @@ class AccountSettingsScreen extends StatelessWidget {
                 ),
               );
             },
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
+            child: const Text('Save', style: TextStyle(color: AppColors.textPrimary)),
           ),
         ],
       ),
@@ -253,20 +252,16 @@ class AccountSettingsScreen extends StatelessWidget {
     final res = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.grey[900],
-        title: const Text('Demo payment', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Confirm demo payment of ₹100 to activate Pro.',
-          style: TextStyle(color: Colors.white70),
-        ),
+        title: const Text('Demo payment'),
+        content: const Text('Confirm demo payment of ₹100 to activate Pro.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Pay ₹100', style: TextStyle(color: Colors.white)),
+            child: const Text('Pay ₹100', style: TextStyle(color: AppColors.textPrimary)),
           ),
         ],
       ),
@@ -287,8 +282,8 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.grey[900],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -299,7 +294,7 @@ class _SectionCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -330,13 +325,13 @@ class _InfoRow extends StatelessWidget {
           width: 90,
           child: Text(
             label,
-            style: TextStyle(color: Colors.grey[400]),
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
             textAlign: TextAlign.right,
           ),
         ),

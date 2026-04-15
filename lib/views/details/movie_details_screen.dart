@@ -6,6 +6,8 @@ import '../player/video_player_screen.dart';
 import '../../../services/settings_service.dart';
 import '../../../services/download_service.dart';
 import '../../../services/subscription_service.dart';
+import '../../../theme/app_colors.dart';
+import '../../../theme/widgets/app_buttons.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
   final Movie movie;
@@ -17,10 +19,8 @@ class MovieDetailsScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -37,20 +37,25 @@ class MovieDetailsScreen extends StatelessWidget {
                   child: Container(
                     height: 400,
                     decoration: BoxDecoration(
-                      color: Colors.grey[900],
+                      color: AppColors.surface,
                       image: movie.backdropPath.isNotEmpty ? DecorationImage(
                         image: AssetImage(movie.backdropPath),
                         fit: BoxFit.cover,
                       ) : null,
                     ),
-                    child: movie.backdropPath.isEmpty ? const Center(child: Icon(Icons.movie, size: 80, color: Colors.grey)) : null,
+                    child: movie.backdropPath.isEmpty
+                        ? const Center(child: Icon(Icons.movie, size: 80, color: AppColors.textMuted))
+                        : null,
                   ),
                 ),
                 Container(
                   height: 400,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.black, Colors.transparent],
+                      colors: [
+                        AppColors.background,
+                        AppColors.background.withValues(alpha: 0.0),
+                      ],
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                     ),
@@ -72,23 +77,21 @@ class MovieDetailsScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Text('Match 98%', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Match 98%',
+                        style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold),
+                      ),
                       const SizedBox(width: 8),
-                      Text(movie.rating.toStringAsFixed(1), style: const TextStyle(color: Colors.white70)),
+                      Text(
+                        movie.rating.toStringAsFixed(1),
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   
                   // Play Button
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                    ),
-                    icon: const Icon(Icons.play_arrow, size: 28),
-                    label: const Text('Play', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  AppPrimaryButton(
                     onPressed: () {
                       final subscription = context.read<SubscriptionService>();
 
@@ -124,6 +127,21 @@ class MovieDetailsScreen extends StatelessWidget {
                         ),
                       );
                     },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.play_arrow, size: 22, color: AppColors.textPrimary),
+                        SizedBox(width: 10),
+                        Text(
+                          'Play',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   
@@ -132,18 +150,7 @@ class MovieDetailsScreen extends StatelessWidget {
                       final isDownloaded = downloads.isDownloaded(movie.id);
                       final canDownload = downloads.canDownloadNow;
 
-                      return ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[800],
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                        ),
-                        icon: Icon(isDownloaded ? Icons.check_circle : Icons.file_download),
-                        label: Text(
-                          isDownloaded ? 'Downloaded' : 'Download',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
+                      return AppSecondaryButton(
                         onPressed: () async {
                           if (isDownloaded) {
                             await context.read<DownloadService>().removeDownload(movie.id);
@@ -177,6 +184,25 @@ class MovieDetailsScreen extends StatelessWidget {
                             );
                           }
                         },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isDownloaded ? Icons.check_circle : Icons.file_download,
+                              size: 20,
+                              color: isDownloaded ? AppColors.success : AppColors.textPrimary,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              isDownloaded ? 'Downloaded' : 'Download',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
                       );
                     },
                   ),
@@ -185,7 +211,7 @@ class MovieDetailsScreen extends StatelessWidget {
                   // Overview
                   Text(
                     movie.overview,
-                    style: const TextStyle(fontSize: 14, color: Colors.white70, height: 1.4),
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.4),
                   ),
                   const SizedBox(height: 24),
                   
@@ -228,15 +254,14 @@ class MovieDetailsScreen extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              backgroundColor: Colors.grey[900],
-              title: const Text('Rate this movie', style: TextStyle(color: Colors.white)),
+              title: const Text('Rate this movie'),
               content: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(5, (index) {
                   return IconButton(
                     icon: Icon(
                       index < rating ? Icons.star : Icons.star_border,
-                      color: Colors.red,
+                      color: AppColors.pink,
                       size: 32,
                     ),
                     onPressed: () {
@@ -250,7 +275,7 @@ class MovieDetailsScreen extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                  child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
                 ),
                 TextButton(
                   onPressed: () {
@@ -259,7 +284,7 @@ class MovieDetailsScreen extends StatelessWidget {
                       SnackBar(content: Text('You rated this movie $rating stars!')),
                     );
                   },
-                  child: const Text('Submit', style: TextStyle(color: Colors.white)),
+                  child: const Text('Submit', style: TextStyle(color: AppColors.textPrimary)),
                 ),
               ],
             );
@@ -272,7 +297,7 @@ class MovieDetailsScreen extends StatelessWidget {
   void _showShareModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.grey[900],
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         return Padding(
@@ -280,15 +305,22 @@ class MovieDetailsScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Share via...', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Share via...',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildShareIcon(context, Icons.chat, 'WhatsApp', Colors.green),
-                  _buildShareIcon(context, Icons.camera_alt, 'Instagram', Colors.purpleAccent),
-                  _buildShareIcon(context, Icons.facebook, 'Facebook', Colors.blue),
-                  _buildShareIcon(context, Icons.copy, 'Copy Link', Colors.grey),
+                  _buildShareIcon(context, Icons.chat, 'WhatsApp', AppColors.success),
+                  _buildShareIcon(context, Icons.camera_alt, 'Instagram', AppColors.pink),
+                  _buildShareIcon(context, Icons.facebook, 'Facebook', AppColors.blue),
+                  _buildShareIcon(context, Icons.copy, 'Copy Link', AppColors.textMuted),
                 ],
               ),
             ],
@@ -312,10 +344,10 @@ class MovieDetailsScreen extends StatelessWidget {
           CircleAvatar(
             radius: 25,
             backgroundColor: color,
-            child: Icon(icon, color: Colors.white),
+            child: Icon(icon, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
         ],
       ),
     );
@@ -326,9 +358,9 @@ class MovieDetailsScreen extends StatelessWidget {
       onTap: onTap,
       child: Column(
         children: [
-          Icon(icon, color: Colors.white, size: 28),
+          Icon(icon, color: AppColors.textPrimary, size: 28),
           const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
+          Text(label, style: const TextStyle(color: AppColors.textPrimary, fontSize: 12)),
         ],
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'utils/theme.dart';
+import 'theme/app_theme.dart';
 import 'views/auth/login_screen.dart';
 import 'views/home/home_screen.dart';
 import 'controllers/auth_provider.dart';
@@ -46,7 +46,7 @@ class MovieApp extends StatelessWidget {
     return MaterialApp(
       title: 'Movieflix',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.dark,
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           if (auth.isInitLoading) {
