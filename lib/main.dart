@@ -44,7 +44,7 @@ class MovieApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Netflix Clone',
+      title: 'Movieflix',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
       home: Consumer<AuthProvider>(

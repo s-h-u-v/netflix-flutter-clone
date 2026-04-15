@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'NETFLIX',
+          'MOVIEFLIX',
           style: TextStyle(
             color: Constants.primaryColor,
             fontWeight: FontWeight.bold,
@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'New to Netflix? ',
+                    'New to Movieflix? ',
                     style: TextStyle(color: Colors.grey),
                   ),
                   GestureDetector(

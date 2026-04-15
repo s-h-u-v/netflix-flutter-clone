@@ -43,7 +43,7 @@ class _SignupScreenState extends State<SignupScreen> {
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NETFLIX', style: TextStyle(color: Constants.primaryColor, fontWeight: FontWeight.bold, fontSize: 30)),
+        title: const Text('MOVIEFLIX', style: TextStyle(color: Constants.primaryColor, fontWeight: FontWeight.bold, fontSize: 30)),
         backgroundColor: Colors.transparent,
       ),
       body: Center(

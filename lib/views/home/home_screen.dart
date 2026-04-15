@@ -26,12 +26,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // If it's not the Home tab, don't show the transparent Netflix AppBar to avoid overlapping.
+    // If it's not the Home tab, don't show the transparent app bar to avoid overlapping.
     return Scaffold(
       extendBodyBehindAppBar: _currentIndex == 0,
       appBar: _currentIndex == 0 ? AppBar(
         title: const Text(
-          'NETFLIX',
+          'MOVIEFLIX',
           style: TextStyle(
             color: Constants.primaryColor,
             fontSize: 28,
