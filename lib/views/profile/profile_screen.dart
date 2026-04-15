@@ -114,10 +114,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         downloads.network.name.toUpperCase(),
                       ),
                       _statusRow(
-                        'Video Quality',
-                        settings.videoQuality.name.toUpperCase(),
-                      ),
-                      _statusRow(
                         'Autoplay Next',
                         settings.autoplayNextEpisode ? 'ON' : 'OFF',
                       ),
